@@ -1,0 +1,112 @@
+/* ──────────────────────────────────────────────
+   Navbar.css
+   Estilos de la barra de navegación superior
+   ────────────────────────────────────────────── */
+
+.navbar {
+  /* Posición fija: se queda pegada arriba aunque el usuario haga scroll */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+
+  background: rgba(10, 14, 26, 0.92);
+  /* backdrop-filter: difumina el contenido detrás del navbar (efecto cristal) */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 255, 159, 0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Brand / Logo ── */
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar__portal {
+  /* El círculo verde que pulsa para simular un portal */
+  font-size: 1.2rem;
+  color: var(--accent);
+  animation: pulse-portal 2s ease-in-out infinite;
+}
+
+@keyframes pulse-portal {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.3); }
+}
+
+.navbar__title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.navbar__subtitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+/* ── Links de navegación ── */
+.navbar__nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navbar__link {
+  /* "text-decoration: none" elimina el subrayado por defecto de los enlaces */
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  /* transition: anima suavemente los cambios de color/borde en hover */
+  transition: all 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: var(--accent);
+  border-color: rgba(0, 255, 159, 0.3);
+  background: rgba(0, 255, 159, 0.05);
+}
+
+/* Clase que NavLink agrega automáticamente cuando la ruta está activa */
+.navbar__link--active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(0, 255, 159, 0.1);
+}
+
+/* ── Responsive: móvil ── */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .navbar__subtitle {
+    display: none; /* Ocultar subtítulo en pantallas muy pequeñas */
+  }
+
+  .navbar__link {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
