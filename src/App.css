@@ -17,12 +17,7 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(0, 255, 159, 0.12);
   box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 1px 0 rgba(0,255,159,0.08) inset;
-  animation: navbar-slide-down 0.6s cubic-bezier(0.22,1,0.36,1) both;
-}
-
-@keyframes navbar-slide-down {
-  from { transform: translateY(-100%); opacity: 0; }
-  to   { transform: translateY(0);     opacity: 1; }
+  animation-duration: 0.5s !important;
 }
 
 .navbar__brand {
@@ -210,15 +205,11 @@
   overflow: hidden;
   cursor: pointer;
   position: relative;
-  opacity: 0;
-  animation: card-enter 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
-  animation-delay: calc(var(--i, 0) * 60ms);
   transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-@keyframes card-enter {
-  from { opacity: 0; transform: translateY(20px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.card.animate__fadeInUp {
+  animation-duration: 0.45s !important;
 }
 
 .card::before {
@@ -245,7 +236,7 @@
 }
 
 .card__image-wrapper {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   position: relative;
 }
@@ -375,8 +366,15 @@
 
 .error-banner__icon { font-size: 1.5rem; }
 
+/* ── animate.css speed overrides ──────────────────────────── */
+.animate__slideInLeft  { animation-duration: 0.4s !important; }
+.animate__zoomIn       { animation-duration: 0.4s !important; }
+.animate__rotateIn     { animation-duration: 0.6s !important; }
+.animate__fadeInUp     { animation-duration: 0.5s !important; }
+.animate__fadeIn       { animation-duration: 0.35s !important; }
+
 /* ── HomeView ─────────────────────────────────────────────── */
-.home { animation: fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.home {}
 
 .home__header {
   display: flex;
@@ -392,7 +390,6 @@
   font-size: clamp(1.2rem, 3vw, 1.8rem);
   color: var(--text-primary);
   margin: 0;
-  animation: slide-right 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .home__count { color: var(--accent); font-size: 0.85em; text-shadow: 0 0 12px rgba(0,255,159,0.4); }
@@ -429,7 +426,7 @@
 }
 
 /* ── FilterView ───────────────────────────────────────────── */
-.filter-page { animation: fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.filter-page {}
 
 .filter-page__header {
   display: flex;
@@ -445,7 +442,6 @@
   font-size: clamp(1.2rem, 3vw, 1.8rem);
   color: var(--text-primary);
   margin: 0;
-  animation: slide-right 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .filter-page__controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
@@ -547,7 +543,6 @@
 .detail {
   max-width: 900px;
   margin: 0 auto;
-  animation: fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .btn-back {
@@ -603,7 +598,6 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,159,0.05);
-  animation: card-enter 0.5s cubic-bezier(0.22,1,0.36,1) both;
   animation-delay: 0.1s;
 }
 
@@ -639,8 +633,6 @@
   color: var(--text-primary);
   margin: 0;
   text-shadow: 0 0 20px rgba(0,255,159,0.15);
-  animation: slide-right 0.6s cubic-bezier(0.22,1,0.36,1) both;
-  animation-delay: 0.15s;
 }
 
 .detail__status {
@@ -654,8 +646,6 @@
   font-weight: 700;
   width: fit-content;
   background: rgba(255,255,255,0.04);
-  animation: fade-in 0.5s ease both;
-  animation-delay: 0.25s;
 }
 
 .detail__attrs { margin: 0; display: flex; flex-direction: column; gap: 0; }
@@ -715,7 +705,6 @@
   padding: 4rem 2rem;
   min-height: 60vh;
   gap: 1.75rem;
-  animation: fade-up 0.6s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 .error-page__portal {
