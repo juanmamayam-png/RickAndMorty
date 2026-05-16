@@ -856,3 +856,100 @@
     gap: 0.85rem;
   }
 }
+
+/* ── BackgroundEffects ────────────────────────────────────── */
+.bg-effects {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ensure content stays above background */
+.app-wrapper > .navbar,
+.app-wrapper > .main-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Portals ──────────────────────────────────────────────── */
+.bg-portal {
+  position: absolute;
+  border-radius: 50%;
+  animation: portal-float ease-in-out infinite alternate;
+}
+
+@keyframes portal-float {
+  0%   { transform: translate(0, 0)    rotate(0deg)   scale(1); }
+  33%  { transform: translate(12px, -18px) rotate(60deg)  scale(1.05); }
+  66%  { transform: translate(-8px, 10px)  rotate(120deg) scale(0.96); }
+  100% { transform: translate(6px, -6px)   rotate(180deg) scale(1.02); }
+}
+
+.bg-portal__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.bg-portal__ring--1 {
+  inset: 0;
+  border-color: rgba(0, 255, 159, 0.6) transparent transparent rgba(0, 255, 159, 0.2);
+  animation: bg-spin 3s linear infinite;
+  filter: blur(0.5px);
+}
+
+.bg-portal__ring--2 {
+  inset: 12%;
+  border-color: transparent rgba(0, 220, 130, 0.5) rgba(0, 220, 130, 0.2) transparent;
+  animation: bg-spin 2s linear infinite reverse;
+}
+
+.bg-portal__ring--3 {
+  inset: 25%;
+  border-color: rgba(0, 255, 159, 0.35) transparent transparent transparent;
+  animation: bg-spin 4s linear infinite;
+}
+
+.bg-portal__core {
+  position: absolute;
+  inset: 35%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 159, 0.25) 0%,
+    rgba(0, 180, 100, 0.10) 50%,
+    transparent 100%
+  );
+  animation: bg-core-breathe 3s ease-in-out infinite;
+  box-shadow:
+    0 0 20px rgba(0, 255, 159, 0.2),
+    0 0 60px rgba(0, 255, 159, 0.06),
+    inset 0 0 20px rgba(0, 255, 159, 0.1);
+}
+
+@keyframes bg-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes bg-core-breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+/* ── Particles ────────────────────────────────────────────── */
+.bg-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 159, 0.8), rgba(0, 255, 159, 0.2));
+  box-shadow: 0 0 6px rgba(0, 255, 159, 0.4);
+  animation: particle-float ease-in-out infinite alternate;
+}
+
+@keyframes particle-float {
+  0%   { transform: translateY(0)     translateX(0);           opacity: 0.2; }
+  50%  { opacity: 0.8; }
+  100% { transform: translateY(-40px) translateX(var(--drift)); opacity: 0.1; }
+}
