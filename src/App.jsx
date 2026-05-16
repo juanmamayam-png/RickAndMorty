@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import {
   BrowserRouter,
   Routes,
@@ -7,6 +7,7 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
+import { animate, stagger } from 'animejs'
 import 'animate.css'
 import './App.css'
 
@@ -78,6 +79,40 @@ function useCharacters(url) {
   return { characters, loading, error }
 }
 
+// ── useGridEntrance — anime.js stagger for card grids ─────────────────────────
+function useGridEntrance(gridRef, trigger) {
+  useEffect(() => {
+    if (!gridRef.current) return
+    const cards = gridRef.current.querySelectorAll('.card')
+    if (!cards.length) return
+    animate(cards, {
+      opacity:    [0, 1],
+      translateY: [32, 0],
+      scale:      [0.94, 1],
+      delay:      stagger(45),
+      duration:   480,
+      ease:       'outBack(1.1)',
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trigger])
+}
+
+// ── useCountUp — anime.js number counter ──────────────────────────────────────
+function useCountUp(ref, target) {
+  useEffect(() => {
+    if (!ref.current || !target) return
+    const obj = { n: 0 }
+    animate(obj, {
+      n:        target,
+      duration: 900,
+      ease:     'outExpo',
+      onUpdate: () => {
+        if (ref.current) ref.current.textContent = Math.round(obj.n)
+      },
+    })
+  }, [target])
+}
+
 // ── LoadingSpinner ────────────────────────────────────────────────────────────
 function LoadingSpinner() {
   return (
@@ -94,24 +129,19 @@ function LoadingSpinner() {
 }
 
 // ── CharacterCard ─────────────────────────────────────────────────────────────
-function CharacterCard({ character, index = 0 }) {
+function CharacterCard({ character }) {
   const navigate = useNavigate()
   const statusClass = {
     Alive: 'status--alive', Dead: 'status--dead', unknown: 'status--unknown',
   }[character.status] || 'status--unknown'
 
-  function goToDetail() {
-    navigate(`/character/${character.id}`)
-  }
-
   return (
     <div
-      className="card animate__animated animate__fadeInUp"
-      style={{ animationDelay: `${Math.min(index, 20) * 55}ms` }}
-      onClick={goToDetail}
+      className="card"
+      onClick={() => navigate(`/character/${character.id}`)}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && goToDetail()}
+      onKeyDown={e => e.key === 'Enter' && navigate(`/character/${character.id}`)}
     >
       <div className="card__image-wrapper">
         <img
@@ -184,12 +214,17 @@ const API_BASE = 'https://rickandmortyapi.com/api/character'
 function HomeView() {
   const [query, setQuery] = useState('')
   const { characters, loading, error } = useCharacters(API_BASE)
+  const gridRef  = useRef(null)
+  const countRef = useRef(null)
 
   const filtered = useMemo(() => {
     if (!query.trim()) return characters
     const q = query.toLowerCase()
     return characters.filter(c => c.name.toLowerCase().includes(q))
   }, [characters, query])
+
+  useGridEntrance(gridRef, filtered)
+  useCountUp(countRef, filtered.length)
 
   if (loading) return <LoadingSpinner />
 
@@ -205,7 +240,7 @@ function HomeView() {
       <div className="home__header">
         <h1 className="home__title animate__animated animate__slideInLeft">
           Todos los personajes
-          <span className="home__count"> ({filtered.length})</span>
+          <span className="home__count"> (<span ref={countRef}>0</span>)</span>
         </h1>
         <input
           type="search"
@@ -222,9 +257,9 @@ function HomeView() {
           <p>No se encontró ningún personaje con ese nombre.</p>
         </div>
       ) : (
-        <div className="characters-grid">
-          {filtered.map((c, i) => (
-            <CharacterCard key={c.id} character={c} index={i} />
+        <div className="characters-grid" ref={gridRef}>
+          {filtered.map(c => (
+            <CharacterCard key={c.id} character={c} />
           ))}
         </div>
       )}
@@ -248,6 +283,9 @@ function FilterView() {
   const [selectedSpecies, setSelectedSpecies] = useState('Human')
   const apiUrl = `${API_BASE}/?species=${encodeURIComponent(selectedSpecies)}`
   const { characters, loading, error } = useCharacters(apiUrl)
+  const gridRef = useRef(null)
+
+  useGridEntrance(gridRef, characters)
 
   return (
     <section className="filter-page animate__animated animate__fadeIn">
@@ -297,9 +335,9 @@ function FilterView() {
         </div>
       )}
       {!loading && !error && characters.length > 0 && (
-        <div className="characters-grid">
-          {characters.map((c, i) => (
-            <CharacterCard key={c.id} character={c} index={i} />
+        <div className="characters-grid" ref={gridRef}>
+          {characters.map(c => (
+            <CharacterCard key={c.id} character={c} />
           ))}
         </div>
       )}
@@ -315,11 +353,12 @@ const STATUS_CONFIG = {
 }
 
 function DetailView() {
-  const { id } = useParams()
+  const { id }   = useParams()
   const navigate = useNavigate()
   const [character, setCharacter] = useState(null)
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState(null)
+  const attrsRef = useRef(null)
 
   useEffect(() => {
     async function fetchCharacter() {
@@ -341,6 +380,17 @@ function DetailView() {
     }
     fetchCharacter()
   }, [id])
+
+  useEffect(() => {
+    if (!attrsRef.current || !character) return
+    animate(attrsRef.current.querySelectorAll('.detail__attr-row'), {
+      translateX: ['-18px', '0px'],
+      opacity:    [0, 1],
+      delay:      stagger(75),
+      duration:   380,
+      ease:       'outCubic',
+    })
+  }, [character])
 
   if (loading) return <LoadingSpinner />
 
@@ -376,7 +426,7 @@ function DetailView() {
             {sc.label}
           </span>
 
-          <dl className="detail__attrs">
+          <dl className="detail__attrs" ref={attrsRef}>
             <DetailRow label="Especie"   value={t.species(character.species)} />
             <DetailRow label="Género"    value={t.gender(character.gender)} />
             <DetailRow label="Tipo"      value={character.type || 'N/A'} />
@@ -426,21 +476,21 @@ function NotFoundView() {
 
 // ── BackgroundEffects ─────────────────────────────────────────────────────────
 const PORTALS = [
-  { size: 320, top: '8%',  left: '-6%',  duration: 18, delay: 0,   opacity: 0.18 },
-  { size: 200, top: '55%', right: '-4%', duration: 24, delay: 4,   opacity: 0.13 },
-  { size: 140, top: '75%', left: '15%',  duration: 14, delay: 2,   opacity: 0.10 },
-  { size: 260, top: '20%', right: '8%',  duration: 20, delay: 7,   opacity: 0.12 },
-  { size: 100, top: '40%', left: '45%',  duration: 12, delay: 10,  opacity: 0.08 },
+  { size: 320, top: '8%',  left: '-6%',  duration: 18, delay: 0,  opacity: 0.18 },
+  { size: 200, top: '55%', right: '-4%', duration: 24, delay: 4,  opacity: 0.13 },
+  { size: 140, top: '75%', left: '15%',  duration: 14, delay: 2,  opacity: 0.10 },
+  { size: 260, top: '20%', right: '8%',  duration: 20, delay: 7,  opacity: 0.12 },
+  { size: 100, top: '40%', left: '45%',  duration: 12, delay: 10, opacity: 0.08 },
 ]
 
 const PARTICLES = Array.from({ length: 40 }, (_, i) => ({
-  id: i,
-  size:     2 + Math.random() * 3,
-  top:      `${Math.random() * 100}%`,
-  left:     `${Math.random() * 100}%`,
-  duration: 6 + Math.random() * 14,
-  delay:    Math.random() * 10,
-  drift:    (Math.random() - 0.5) * 60,
+  id:       i,
+  size:     2 + (i * 7.3 % 3),
+  top:      `${(i * 13.7) % 100}%`,
+  left:     `${(i * 19.3) % 100}%`,
+  duration: 6 + (i * 3.7 % 14),
+  delay:    (i * 2.3) % 10,
+  drift:    ((i % 7) - 3) * 20,
 }))
 
 function BackgroundEffects() {
@@ -496,10 +546,10 @@ export default function App() {
         <Navbar />
         <main className="main-content">
           <Routes>
-            <Route path="/"               element={<HomeView />} />
-            <Route path="/filter"         element={<FilterView />} />
-            <Route path="/character/:id"  element={<DetailView />} />
-            <Route path="*"               element={<NotFoundView />} />
+            <Route path="/"              element={<HomeView />} />
+            <Route path="/filter"        element={<FilterView />} />
+            <Route path="/character/:id" element={<DetailView />} />
+            <Route path="*"              element={<NotFoundView />} />
           </Routes>
         </main>
       </div>
