@@ -7,6 +7,7 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
+import 'animate.css'
 import './App.css'
 
 // ── Traducciones ──────────────────────────────────────────────────────────────
@@ -105,8 +106,8 @@ function CharacterCard({ character, index = 0 }) {
 
   return (
     <div
-      className="card"
-      style={{ '--i': Math.min(index, 20) }}
+      className="card animate__animated animate__fadeInUp"
+      style={{ animationDelay: `${Math.min(index, 20) * 55}ms` }}
       onClick={goToDetail}
       role="button"
       tabIndex={0}
@@ -144,7 +145,7 @@ function CharacterCard({ character, index = 0 }) {
 function Navbar() {
   const navigate = useNavigate()
   return (
-    <nav className="navbar">
+    <nav className="navbar animate__animated animate__slideInDown">
       <div
         className="navbar__brand"
         onClick={() => navigate('/')}
@@ -200,9 +201,9 @@ function HomeView() {
   )
 
   return (
-    <section className="home">
+    <section className="home animate__animated animate__fadeIn">
       <div className="home__header">
-        <h1 className="home__title">
+        <h1 className="home__title animate__animated animate__slideInLeft">
           Todos los personajes
           <span className="home__count"> ({filtered.length})</span>
         </h1>
@@ -249,9 +250,9 @@ function FilterView() {
   const { characters, loading, error } = useCharacters(apiUrl)
 
   return (
-    <section className="filter-page">
+    <section className="filter-page animate__animated animate__fadeIn">
       <div className="filter-page__header">
-        <h1 className="filter-page__title">Filtrar por especie</h1>
+        <h1 className="filter-page__title animate__animated animate__slideInLeft">Filtrar por especie</h1>
         <div className="filter-page__controls">
           <select
             className="filter-page__select"
@@ -353,10 +354,10 @@ function DetailView() {
   const sc = STATUS_CONFIG[character.status] || STATUS_CONFIG.unknown
 
   return (
-    <article className="detail">
-      <button className="btn-back" onClick={() => navigate(-1)}>← Volver</button>
+    <article className="detail animate__animated animate__fadeIn">
+      <button className="btn-back animate__animated animate__slideInLeft" onClick={() => navigate(-1)}>← Volver</button>
 
-      <div className="detail__card">
+      <div className="detail__card animate__animated animate__zoomIn" style={{ animationDelay: '0.1s' }}>
         <div className="detail__image-wrapper">
           <img
             src={character.image}
@@ -405,8 +406,8 @@ function DetailRow({ label, value }) {
 function NotFoundView() {
   const navigate = useNavigate()
   return (
-    <div className="error-page">
-      <div className="error-page__portal">
+    <div className="error-page animate__animated animate__fadeInUp">
+      <div className="error-page__portal animate__animated animate__rotateIn" style={{ animationDelay: '0.2s' }}>
         <div className="error-page__portal-inner">
           <span className="error-page__code">404</span>
         </div>
