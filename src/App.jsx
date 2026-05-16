@@ -1,8 +1,16 @@
 import { useState, useMemo, useEffect } from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  NavLink,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import './App.css'
 
 // ── Traducciones ──────────────────────────────────────────────────────────────
-const STATUS_MAP = { Alive: 'Vivo', Dead: 'Muerto', unknown: 'Desconocido' }
+const STATUS_MAP  = { Alive: 'Vivo', Dead: 'Muerto', unknown: 'Desconocido' }
 const SPECIES_MAP = {
   Human: 'Humano', Alien: 'Alienígena', Robot: 'Robot',
   'Mythological Creature': 'Criatura Mitológica', Animal: 'Animal',
@@ -10,7 +18,7 @@ const SPECIES_MAP = {
   Poopybutthole: 'Poopybutthole', Disease: 'Enfermedad',
   Planet: 'Planeta', unknown: 'Desconocido',
 }
-const GENDER_MAP = {
+const GENDER_MAP  = {
   Male: 'Masculino', Female: 'Femenino',
   Genderless: 'Sin género', unknown: 'Desconocido',
 }
@@ -85,19 +93,24 @@ function LoadingSpinner() {
 }
 
 // ── CharacterCard ─────────────────────────────────────────────────────────────
-function CharacterCard({ character, index = 0, navigate }) {
+function CharacterCard({ character, index = 0 }) {
+  const navigate = useNavigate()
   const statusClass = {
     Alive: 'status--alive', Dead: 'status--dead', unknown: 'status--unknown',
   }[character.status] || 'status--unknown'
+
+  function goToDetail() {
+    navigate(`/character/${character.id}`)
+  }
 
   return (
     <div
       className="card"
       style={{ '--i': Math.min(index, 20) }}
-      onClick={() => navigate('detail', character.id)}
+      onClick={goToDetail}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && navigate('detail', character.id)}
+      onKeyDown={e => e.key === 'Enter' && goToDetail()}
     >
       <div className="card__image-wrapper">
         <img
@@ -128,12 +141,13 @@ function CharacterCard({ character, index = 0, navigate }) {
 }
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-function Navbar({ view, navigate }) {
+function Navbar() {
+  const navigate = useNavigate()
   return (
     <nav className="navbar">
       <div
         className="navbar__brand"
-        onClick={() => navigate('home')}
+        onClick={() => navigate('/')}
         style={{ cursor: 'pointer' }}
       >
         <span className="navbar__portal">🌀</span>
@@ -141,18 +155,23 @@ function Navbar({ view, navigate }) {
         <span className="navbar__subtitle">Wiki</span>
       </div>
       <div className="navbar__nav">
-        <button
-          className={`navbar__link ${view === 'home' ? 'navbar__link--active' : ''}`}
-          onClick={() => navigate('home')}
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `navbar__link${isActive ? ' navbar__link--active' : ''}`
+          }
         >
           Personajes
-        </button>
-        <button
-          className={`navbar__link ${view === 'filter' ? 'navbar__link--active' : ''}`}
-          onClick={() => navigate('filter')}
+        </NavLink>
+        <NavLink
+          to="/filter"
+          className={({ isActive }) =>
+            `navbar__link${isActive ? ' navbar__link--active' : ''}`
+          }
         >
           Filtrar
-        </button>
+        </NavLink>
       </div>
     </nav>
   )
@@ -161,7 +180,7 @@ function Navbar({ view, navigate }) {
 // ── HomeView ──────────────────────────────────────────────────────────────────
 const API_BASE = 'https://rickandmortyapi.com/api/character'
 
-function HomeView({ navigate }) {
+function HomeView() {
   const [query, setQuery] = useState('')
   const { characters, loading, error } = useCharacters(API_BASE)
 
@@ -204,7 +223,7 @@ function HomeView({ navigate }) {
       ) : (
         <div className="characters-grid">
           {filtered.map((c, i) => (
-            <CharacterCard key={c.id} character={c} index={i} navigate={navigate} />
+            <CharacterCard key={c.id} character={c} index={i} />
           ))}
         </div>
       )}
@@ -224,7 +243,7 @@ const SPECIES_OPTIONS = [
   { value: 'unknown',               label: '❓ Desconocido' },
 ]
 
-function FilterView({ navigate }) {
+function FilterView() {
   const [selectedSpecies, setSelectedSpecies] = useState('Human')
   const apiUrl = `${API_BASE}/?species=${encodeURIComponent(selectedSpecies)}`
   const { characters, loading, error } = useCharacters(apiUrl)
@@ -279,7 +298,7 @@ function FilterView({ navigate }) {
       {!loading && !error && characters.length > 0 && (
         <div className="characters-grid">
           {characters.map((c, i) => (
-            <CharacterCard key={c.id} character={c} index={i} navigate={navigate} />
+            <CharacterCard key={c.id} character={c} index={i} />
           ))}
         </div>
       )}
@@ -288,7 +307,15 @@ function FilterView({ navigate }) {
 }
 
 // ── DetailView ────────────────────────────────────────────────────────────────
-function DetailView({ id, navigate }) {
+const STATUS_CONFIG = {
+  Alive:   { color: '#00e676', label: 'Vivo' },
+  Dead:    { color: '#ef5350', label: 'Muerto' },
+  unknown: { color: '#9e9e9e', label: 'Desconocido' },
+}
+
+function DetailView() {
+  const { id } = useParams()
+  const navigate = useNavigate()
   const [character, setCharacter] = useState(null)
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState(null)
@@ -313,12 +340,6 @@ function DetailView({ id, navigate }) {
     }
     fetchCharacter()
   }, [id])
-
-  const STATUS_CONFIG = {
-    Alive:   { color: '#00e676', label: 'Vivo' },
-    Dead:    { color: '#ef5350', label: 'Muerto' },
-    unknown: { color: '#9e9e9e', label: 'Desconocido' },
-  }
 
   if (loading) return <LoadingSpinner />
 
@@ -381,7 +402,8 @@ function DetailRow({ label, value }) {
 }
 
 // ── NotFoundView ──────────────────────────────────────────────────────────────
-function NotFoundView({ navigate }) {
+function NotFoundView() {
+  const navigate = useNavigate()
   return (
     <div className="error-page">
       <div className="error-page__portal">
@@ -394,45 +416,92 @@ function NotFoundView({ navigate }) {
         Parece que este portal te llevó a una dimensión que no existe.
         Prueba con otra sección o vuelve al inicio.
       </p>
-      <button className="error-page__btn" onClick={() => navigate('home')}>
+      <button className="error-page__btn" onClick={() => navigate('/')}>
         🏠 Volver al inicio
       </button>
     </div>
   )
 }
 
+// ── BackgroundEffects ─────────────────────────────────────────────────────────
+const PORTALS = [
+  { size: 320, top: '8%',  left: '-6%',  duration: 18, delay: 0,   opacity: 0.18 },
+  { size: 200, top: '55%', right: '-4%', duration: 24, delay: 4,   opacity: 0.13 },
+  { size: 140, top: '75%', left: '15%',  duration: 14, delay: 2,   opacity: 0.10 },
+  { size: 260, top: '20%', right: '8%',  duration: 20, delay: 7,   opacity: 0.12 },
+  { size: 100, top: '40%', left: '45%',  duration: 12, delay: 10,  opacity: 0.08 },
+]
+
+const PARTICLES = Array.from({ length: 40 }, (_, i) => ({
+  id: i,
+  size:     2 + Math.random() * 3,
+  top:      `${Math.random() * 100}%`,
+  left:     `${Math.random() * 100}%`,
+  duration: 6 + Math.random() * 14,
+  delay:    Math.random() * 10,
+  drift:    (Math.random() - 0.5) * 60,
+}))
+
+function BackgroundEffects() {
+  return (
+    <div className="bg-effects" aria-hidden="true">
+      {PORTALS.map((p, i) => (
+        <div
+          key={i}
+          className="bg-portal"
+          style={{
+            width:    p.size,
+            height:   p.size,
+            top:      p.top,
+            left:     p.left  ?? 'unset',
+            right:    p.right ?? 'unset',
+            opacity:  p.opacity,
+            animationDuration: `${p.duration}s`,
+            animationDelay:    `${p.delay}s`,
+          }}
+        >
+          <div className="bg-portal__ring bg-portal__ring--1" />
+          <div className="bg-portal__ring bg-portal__ring--2" />
+          <div className="bg-portal__ring bg-portal__ring--3" />
+          <div className="bg-portal__core" />
+        </div>
+      ))}
+
+      {PARTICLES.map(p => (
+        <div
+          key={p.id}
+          className="bg-particle"
+          style={{
+            width:    p.size,
+            height:   p.size,
+            top:      p.top,
+            left:     p.left,
+            '--drift': `${p.drift}px`,
+            animationDuration: `${p.duration}s`,
+            animationDelay:    `${p.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [nav, setNav] = useState({ view: 'home', id: null, history: [] })
-
-  function navigate(view, id = null) {
-    if (view === -1) {
-      setNav(prev => {
-        if (prev.history.length === 0) return { ...prev, view: 'home', id: null }
-        const history = [...prev.history]
-        const last    = history.pop()
-        return { view: last.view, id: last.id, history }
-      })
-    } else {
-      setNav(prev => ({
-        view,
-        id,
-        history: [...prev.history, { view: prev.view, id: prev.id }],
-      }))
-    }
-  }
-
-  const { view, id } = nav
-
   return (
-    <div className="app-wrapper">
-      <Navbar view={view} navigate={navigate} />
-      <main className="main-content">
-        {view === 'home'   && <HomeView   navigate={navigate} />}
-        {view === 'filter' && <FilterView navigate={navigate} />}
-        {view === 'detail' && <DetailView id={id} navigate={navigate} />}
-        {view === '404'    && <NotFoundView navigate={navigate} />}
-      </main>
-    </div>
+    <BrowserRouter>
+      <div className="app-wrapper">
+        <BackgroundEffects />
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/"               element={<HomeView />} />
+            <Route path="/filter"         element={<FilterView />} />
+            <Route path="/character/:id"  element={<DetailView />} />
+            <Route path="*"               element={<NotFoundView />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
   )
 }
